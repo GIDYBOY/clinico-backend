@@ -1,0 +1,177 @@
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String    @id @default(uuid())
+  name        String
+  username    String
+  email       String    @unique
+  gender      String
+  phone       String?   @unique
+  address     String?
+  dateOfBirth DateTime?
+  password    String
+  role        Role
+  image       String?
+  doctor      Doctor?
+  patient     Patient?
+  createdAt   DateTime  @default(now())
+
+  sentMessages     Message[]    @relation("MessageSender")
+  receivedMessages Message[]    @relation("MessageReceiver")
+  sentTickets      Ticket[]     @relation("TicketSender")
+  AccessCode       AccessCode[]
+}
+
+model Doctor {
+  id                   String        @id @default(uuid())
+  userId               String        @unique
+  specialization       String
+  department           Departments
+  medicalLicenseNumber String?
+  yearsOfExperience    Int?
+  education            String?
+  certifications       String?
+  appointments         Appointment[]
+  user                 User          @relation(fields: [userId], references: [id])
+}
+
+model Patient {
+  id                           String         @id @default(uuid())
+  userId                       String         @unique
+  bloodGroup                   String?
+  allergies                    String?
+  currentMedications           String?
+  existingConditions           String?
+  emergencyContactName         String?
+  emergencyContactPhone        String?
+  emergencyContactLocation     String?
+  emergencyContactRelationship String?
+  primaryPhysician             String?
+  appointments                 Appointment[]
+  invoices                     Invoice[]
+  healthRecords                HealthRecord[]
+  user                         User           @relation(fields: [userId], references: [id])
+}
+
+model Appointment {
+  id        String            @id @default(uuid())
+  patient   Patient           @relation(fields: [patientId], references: [id])
+  patientId String
+  doctor    Doctor            @relation(fields: [doctorId], references: [id])
+  doctorId  String
+  date      DateTime
+  status    AppointmentStatus @default(PENDING)
+  note      String?
+  invoice   Invoice?          @relation("AppointmentInvoice")
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+}
+
+model Invoice {
+  id            String        @id @default(uuid())
+  patient       Patient       @relation(fields: [patientId], references: [id])
+  patientId     String
+  appointment   Appointment   @relation("AppointmentInvoice", fields: [appointmentId], references: [id])
+  appointmentId String        @unique
+  amount        Float
+  status        InvoiceStatus
+  paidAt        DateTime?
+  reference     String?
+  createdAt     DateTime      @default(now())
+}
+
+model HealthRecord {
+  id        String   @id @default(uuid())
+  patient   Patient  @relation(fields: [patientId], references: [id])
+  patientId String
+  record    String?
+  image     String?
+  date      DateTime @default(now())
+}
+
+model Message {
+  id       String @id @default(uuid())
+  sender   User   @relation("MessageSender", fields: [senderId], references: [id])
+  senderId String
+
+  receiver   User     @relation("MessageReceiver", fields: [receiverId], references: [id])
+  receiverId String
+  subject    String
+  content    String
+  read       Boolean  @default(false)
+  createdAt  DateTime @default(now())
+}
+
+model Ticket {
+  id       String @id @default(uuid())
+  senderId String
+  user     User   @relation("TicketSender", fields: [senderId], references: [id])
+
+  subject  String
+  category String?
+  priority TicketPriority
+  status   TicketStatus
+  message  String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AccessCode {
+  id          String   @id @default(uuid())
+  code        String   @unique
+  createdBy   User     @relation(fields: [createdById], references: [id])
+  createdById String
+  used        Boolean  @default(false)
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+}
+
+enum Role {
+  ADMIN
+  DOCTOR
+  PATIENT
+}
+
+enum AppointmentStatus {
+  PENDING
+  SCHEDULED
+  CANCELLED
+  COMPLETED
+}
+
+enum InvoiceStatus {
+  UNPAID
+  PAID
+}
+
+enum Departments {
+  PRIMARY_CARE
+  CHILDREN_HEALTH
+  MEDICAL_SPECIALTIES
+  MENTAL_HEALTH
+  DENTAL_CARE
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
