@@ -1,6 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, TicketStatus } from '@prisma/client';
 import { CreateTicketDTO } from "../validators/ticket.validator"
-import { TicketStatus } from '../generated/prisma/index.d';
 
 const prisma = new PrismaClient();
 
