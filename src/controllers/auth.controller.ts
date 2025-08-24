@@ -24,7 +24,7 @@ export const login = async (req: Request, res: Response) => {
     res.cookie("biscuit", token, {
       httpOnly: true,
       secure: true,
-      sameSite: "lax",
+      sameSite: "none",
       maxAge: 1 * 24 * 60 * 60 * 1000, // 1 day
     });
     const {password, ...payload} = user
