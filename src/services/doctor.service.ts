@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import { PrismaClient, Departments } from "../generated/prisma";
+import { PrismaClient, Departments } from '@prisma/client';
 import { create } from '../controllers/healthRecord.controller';
 import { CreateDoctorDTO } from "../validators/doctor.validator";
 

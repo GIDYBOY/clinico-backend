@@ -1,7 +1,6 @@
-import { PrismaClient } from "../generated/prisma";
+import { PrismaClient } from '@prisma/client';
 import {CreatePatientDTO} from "../validators/patient.validator";
 import bcrypt from "bcrypt";
-// import { Patient } from "../generated/prisma"; // Uncomment if you need to use the Patient type
 
 const prisma = new PrismaClient({
   omit: {
@@ -13,7 +12,6 @@ const prisma = new PrismaClient({
 
 export const createPatient = async (data: CreatePatientDTO) => {
     const hashedPassword = await bcrypt.hash(data.password, 10);
-    console.log("Data: ", data)
 
     const user = await prisma.user.create({
         data: {

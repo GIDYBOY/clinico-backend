@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import morgan from "morgan";
 import routes from "./routes";
-import { PrismaClient } from "./generated/prisma";
+import { PrismaClient } from '@prisma/client';
 import { startAppointmentReminderJob } from "./jobs/appointmentReminder.job";
 import { startOverdueInvoiceJob } from "./jobs/overdueInvoices.job";
 import cookieParser from "cookie-parser";
@@ -19,8 +19,8 @@ dotenv.config();
 const app = express();
 const prisma = new PrismaClient();
 const corsOptions = {
-  origin: "http://localhost:5173",
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  origin: "https://silly-belekoy-f5c3ab.netlify.app",
+  methods: ["GET", "POST", "PUT","PATCH", "DELETE"], // Allowed HTTP methods
   credentials: true, // Allow sending cookies and HTTP authentication
 };
 

@@ -8,7 +8,7 @@ import { getDashboardStats } from "../controllers/admin.controller";
 const router = Router();
 
 // Admin-only routes
-// router.use(authenticate, requireRole("ADMIN"));
+router.use(authenticate, requireRole("ADMIN"));
 
 router.post("/create", AdminController.createAdmin);
 

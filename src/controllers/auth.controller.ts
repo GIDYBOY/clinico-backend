@@ -39,9 +39,31 @@ export const login = async (req: Request, res: Response) => {
 export const me = async (req: AuthenticatedRequest, res: Response) => {
   try {
     res.json(req.user);
+    return;
   } catch (err) {
     console.error("Error fetching user in /me route:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 };
 
+export const forgotPassword = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      res.status(400).json({ error: "Email is required" });
+      return;
+    }
+
+    const result = await AuthService.forgotPassword(email);
+    if (result.success) {
+      res.status(200).json({ message: "Password reset link sent to your email" });
+      return;
+    } else {
+      res.status(400).json({ error: result.error });
+      return;
+    }
+  } catch (error) {
+    console.error("Error in forgotPassword:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}

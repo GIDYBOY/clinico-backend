@@ -6,16 +6,29 @@ import { AuthenticatedRequest } from "../types/user";
 export const create = async (req: AuthenticatedRequest, res: Response) => {
   const user = req.user!;
   if (user.role !== "PATIENT") {
-    res.status(403).json({ error: "Only patients can book appointments" });
-    return;
+    res
+      .status(403)
+      .json({ error: "Only patients can book appointments" });
+      return;
   }
-  const patientId = user?.id;
+
+  const patientId = user.id;
   if (!patientId) {
     res.status(400).json({ error: "Patient record not found" });
     return;
   }
 
   const { doctorId, date, note } = req.body;
+
+  const isAvailable = await AppointmentService.isTimeSlotAvailable(
+    doctorId,
+    new Date(date)
+  );
+  if (!isAvailable) {
+    res.status(409).json({ error: "Selected time is already booked" });
+    return;
+  }
+
   const appointment = await AppointmentService.createAppointmentWithInvoice({
     patientId,
     doctorId,
@@ -23,7 +36,10 @@ export const create = async (req: AuthenticatedRequest, res: Response) => {
     note,
   });
 
-  if(!appointment) res.status(400).json({error: "Failed to create appointment"})
+  if (!appointment) {
+    res.status(400).json({ error: "Failed to create appointment" });
+    return;
+  }
 
   res.status(201).json(appointment);
 };
@@ -41,11 +57,25 @@ export const getAll = async (_req: Request, res: Response) => {
   res.json(appointments);
 };
 
+export const checkAvailability = async (req: Request, res: Response) => {
+  const { doctorId } = req.params;
+  const { date } = req.query;
+  if (!date) {
+    res.status(400).json({ error: "Date is required" });
+    return;
+  }
+  const available = await AppointmentService.isTimeSlotAvailable(
+    doctorId,
+    new Date(date as string)
+  );
+  res.json({ available });
+};
+
 export const updateStatus = async (req: Request, res: Response) => {
   const { id } = req.params;
   const { status } = req.body;
 
-  if (!["scheduled", "cancelled", "completed"].includes(status)) {
+  if (!["SCHEDULED", "CANCELLED", "COMPLETED"].includes(status)) {
     res.status(400).json({ error: "Invalid status" });
     return;
   }

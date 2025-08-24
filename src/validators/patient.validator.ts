@@ -11,7 +11,7 @@ export const CreatePatientSchema = z.object({
   dateOfBirth: z.string().datetime().optional(),
 
   bloodGroup: z.string().optional(),
-  allergies: z.string().optional(),
+  allergies: z.array(z.string()),
   currentMedications: z.string().optional(),
   existingConditions: z.string().optional(),
   emergencyContactName: z.string().optional(),

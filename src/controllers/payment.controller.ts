@@ -2,9 +2,10 @@
 
 import { Request, Response } from "express";
 import Stripe from "stripe";
-import { PrismaClient } from "../generated/prisma";
+import { PrismaClient } from '@prisma/client';
 import dotenv from "dotenv";
 import { sendEmail } from "../utils/email";
+import { sendMessageFromAdmin } from "../services/message.service";
 
 dotenv.config();
 
@@ -97,11 +98,11 @@ export const webhookHandler = async (req: Request, res: Response) => {
             status: "PAID",
             paidAt: new Date(),
             reference: session.payment_intent?.toString() ?? undefined,
-            appointment: {
-              update: {
-                status: "SCHEDULED",
-              },
-            },
+            // appointment: {
+            //   update: {
+            //     status: "SCHEDULED",
+            //   },
+            // },
           },
           include: {
             appointment: {
@@ -127,11 +128,11 @@ export const webhookHandler = async (req: Request, res: Response) => {
           `<p>Your payment has been received. Your appointment with Dr. ${invoice.appointment.doctor.user.name} is now scheduled for ${invoice.appointment.date}.</p>`,
         );
 
-        await sendEmail(
-          doctorEmail,
-          "New appointment scheduled",
-          `<p>A new appointment has been scheduled with ${invoice.appointment.patient.user.name} for ${invoice.appointment.date}.</p>`,
-        );
+        // await sendEmail(
+        //   doctorEmail,
+        //   "New appointment scheduled",
+        //   `<p>A new appointment has been scheduled with ${invoice.appointment.patient.user.name} for ${invoice.appointment.date}.</p>`,
+        // );
 
         console.log(
           `✅ Invoice ${invoiceId} marked as PAID and notifications sent`

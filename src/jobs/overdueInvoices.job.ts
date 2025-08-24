@@ -1,6 +1,6 @@
 import cron from "node-cron";
-import { PrismaClient } from "../generated/prisma";
-import { sendMessage } from "../services/message.service";
+import { PrismaClient } from '@prisma/client';
+import { sendMessageFromAdmin } from "../services/message.service";
 
 const prisma = new PrismaClient();
 
@@ -12,7 +12,7 @@ export const startOverdueInvoiceJob = () => {
 
     const overdue = await prisma.invoice.findMany({
       where: {
-        status: "unpaid",
+        status: "UNPAID",
         createdAt: {
           lt: pastDue,
         },
@@ -25,16 +25,14 @@ export const startOverdueInvoiceJob = () => {
     for (const invoice of overdue) {
       const user = invoice.patient.user;
 
-      await sendMessage(
+      await sendMessageFromAdmin(
         user.id,
-        user.id, // send to self (in-app notification)
+        "Overdue Invoice Reminder",
         `Reminder: Invoice of ₦${
           invoice.amount
         } from ${invoice.createdAt.toLocaleDateString()} is still unpaid. Please pay promptly.`
       );
 
-      // Optional email
-      // await sendEmail(user.email, 'Overdue Invoice Reminder', `...`);
     }
 
     console.log(`[Overdue Invoice Job] Sent ${overdue.length} reminders`);

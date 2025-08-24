@@ -1,4 +1,4 @@
-import { PrismaClient } from "../generated/prisma";
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient({
   omit: {
@@ -16,6 +16,24 @@ export const sendMessage = async (
 ) => {
   return prisma.message.create({
     data: { senderId, receiverId, subject, content },
+  });
+};
+
+export const sendMessageFromAdmin = async (
+  receiverId: string,
+  subject: string,
+  content: string
+) => {
+  // Assuming admin messages are sent from a specific admin user
+  const admin = await prisma.user.findFirst({
+    where: { role: "ADMIN" },
+  });
+  if (!admin) {
+    throw new Error("No admin user found");
+  }
+
+  return prisma.message.create({
+    data: { senderId: admin.id, receiverId, subject, content },
   });
 };
 

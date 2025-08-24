@@ -1,4 +1,4 @@
-import { PrismaClient, Role } from "../generated/prisma";
+import { PrismaClient, Role } from '@prisma/client';
 import { CreateAdminDTO } from "../validators/user.validator";
 import bcrypt from 'bcrypt';
 
@@ -48,6 +48,7 @@ export const generateAccessCode = async (adminId: string) => {
       expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
     },
   });
+  return code;
 }
 
 export const getUserById = async (id: string) => {

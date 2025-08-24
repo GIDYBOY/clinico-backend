@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { verifyToken } from "../utils/jwt";
-import { PrismaClient } from "../generated/prisma";
+import { PrismaClient } from '@prisma/client';
 import { AuthenticatedRequest } from "../types/user";
 
 const prisma = new PrismaClient();
@@ -29,9 +29,9 @@ export const authenticate = async (
       name: user.name,
       email: user.email,
       role: user.role,
-      image: user.image ?? "/images.profile.png"
+      image: user?.image ?? "/images/profile.png"
     };
-    next();
+    next(); // move on to next middleware/controller
   } catch (error) {
     res.status(401).json({ error: "Unauthorized" });
   }

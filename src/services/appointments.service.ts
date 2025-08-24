@@ -1,4 +1,6 @@
-import { PrismaClient, AppointmentStatus } from "../generated/prisma";
+import { PrismaClient, AppointmentStatus } from '@prisma/client';
+import { sendMessageFromAdmin } from "../services/message.service";
+
 
 const prisma = new PrismaClient({
   omit: {
@@ -43,6 +45,7 @@ export const createAppointmentWithInvoice = async ({
 
     const doctor = await tx.doctor.findUnique({
       where: { userId: doctorId },
+      include: { user: true },
     });
 
     if (!patient) return
@@ -67,6 +70,13 @@ export const createAppointmentWithInvoice = async ({
       },
     });
 
+    await sendMessageFromAdmin(
+      patient.userId,
+      "Clinico: Appointment Created",
+      `The status of your appointment with Dr. ${doctor.user.name} has been set to PENDING.
+      Please make payment to validate your appointment`
+    );
+
     return appointment;
   });
 };
@@ -88,22 +98,13 @@ export const getAppointmentsForUser = async (userId: string, role: string) => {
 
     return prisma.appointment.findMany({
       where: { doctorId: doctor.id },
-      include: { patient: { include: { user: true } } },
+      include: { patient: { include: { user: true, healthRecords: true } } },
     });
   }
 
-  return []; // Admins won't use this
+  return [];
 };
 
-// export const getLatestUserAppointment = async (userId: string) => {
-//   return prisma.appointment.findFirst({
-//     where: {userId},
-//     orderBy: {date: {
-//       or
-//     }},
-    
-//   })
-// }
 
 export const getAllAppointments = async () => {
   return prisma.appointment.findMany({
@@ -131,16 +132,24 @@ export const isTimeSlotAvailable = async (
   date: Date,
   excludeId?: string
 ) => {
+
+  const doctor = await prisma.doctor.findUnique({
+    where: { userId: doctorId },
+  });
+  if (!doctor) throw new Error("Doctor not found");
+  
   const conflict = await prisma.appointment.findFirst({
     where: {
-      doctorId,
+      doctorId: doctor.id,
       date,
-      ...(excludeId ? { NOT: { id: excludeId } } : {}),
-      status: { in: ["SCHEDULED", "COMPLETED"] }, // ignore cancelled
+      status: { in: ["SCHEDULED", "COMPLETED"] },
+      ...(excludeId && {
+        id: { not: excludeId },
+      }),
     },
   });
 
-  return !conflict; // return true if available
+  return !conflict;
 };
 
 export const rescheduleAppointment = async (id: string, newDate: Date) => {

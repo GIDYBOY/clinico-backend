@@ -15,6 +15,16 @@ export const create = async (req: AuthenticatedRequest, res: Response) => {
   res.status(201).json(ticket);
 };
 
+export const getTicketById = async (req: Request, res: Response) => {
+  const ticketId = req.params.id;
+  const ticket = await TicketService.getTicketById(ticketId);
+  if (!ticket) {
+    res.status(404).json({ error: "Ticket not found" });
+    return;
+  }
+  res.status(200).json(ticket);
+};
+
 export const userTickets = async (req: AuthenticatedRequest, res: Response) => {
   const tickets = await TicketService.getUserTickets(req.user!.id);
   res.status(200).json(tickets);
@@ -31,4 +41,11 @@ export const updateStatus = async (req: Request, res: Response) => {
 
   const ticket = await TicketService.updateTicketStatus(ticketId, status);
   res.status(200).json(ticket);
+};
+
+
+export const deleteTicket = async (req: Request, res: Response) => {
+  const { ticketId } = req.params;
+  await TicketService.deleteTicket(ticketId);
+  res.status(204).send();
 };

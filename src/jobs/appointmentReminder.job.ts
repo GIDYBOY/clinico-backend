@@ -1,5 +1,5 @@
 import cron from "node-cron";
-import { PrismaClient } from "../generated/prisma";
+import { PrismaClient } from '@prisma/client';
 import { sendMessage } from "../services/message.service";
 import { sendEmail } from "../utils/email";
 

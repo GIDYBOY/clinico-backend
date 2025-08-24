@@ -1,7 +1,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -48,7 +47,7 @@ model Patient {
   id                           String         @id @default(uuid())
   userId                       String         @unique
   bloodGroup                   String?
-  allergies                    String?
+  allergies                    String[]
   currentMedications           String?
   existingConditions           String?
   emergencyContactName         String?
@@ -74,6 +73,7 @@ model Appointment {
   invoice   Invoice?          @relation("AppointmentInvoice")
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
+  @@unique([doctorId, date])
 }
 
 model Invoice {

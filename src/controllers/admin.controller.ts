@@ -1,12 +1,11 @@
 import { Request, Response } from "express";
 import * as AdminService from "../services/admin.service";
-import { Role } from "../generated/prisma";
+import { Role } from '@prisma/client';
 import {CreateAdminSchema} from "../validators/user.validator"
 import { AuthenticatedRequest } from "../types/user";
 
 
 export const createAdmin = async (req: Request, res: Response) => {
-  console.log("Create Admin controller!")
   const parsed = CreateAdminSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.flatten() });
@@ -39,8 +38,8 @@ export const generateAccessCode = async (req: AuthenticatedRequest, res: Respons
   }
   
   try {
-    await AdminService.generateAccessCode(adminId);
-    res.status(201).json({ message: "Access code generated successfully" });
+    const code = await AdminService.generateAccessCode(adminId);
+    res.status(201).json({ message: "Access code generated successfully", code: code });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to generate access code" });

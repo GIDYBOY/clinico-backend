@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import * as InvoiceService from "../services/invoice.service";
-import { PrismaClient } from "../generated/prisma";
+import { PrismaClient } from '@prisma/client';
 import { AuthenticatedRequest } from "../types/user"; 
 
 const prisma = new PrismaClient();
