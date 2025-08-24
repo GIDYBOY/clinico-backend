@@ -52,8 +52,8 @@ export const createCheckoutSession = async (req: Request, res: Response) => {
         },
       ],
       success_url:
-        "http://localhost:5173/payment-success?session_id={CHECKOUT_SESSION_ID}",
-      cancel_url: "http://localhost:5173/payment-canceled",
+        "https://silly-belekoy-f5c3ab.netlify.app/payment-success?session_id={CHECKOUT_SESSION_ID}",
+      cancel_url: "https://silly-belekoy-f5c3ab.netlify.app/payment-canceled",
       metadata: {
         invoiceId: invoice.id,
       },
